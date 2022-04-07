@@ -1,50 +1,11 @@
 from tkinter import *
 from tkinter import ttk
+import time
 
 history = []
 
-# conversion function
-def calculate():
-    is_farenheit_empty = False
-    is_celcius_empty = False
-
-    farenheit_value = farenheit.get()
-    celcius_value = celcius.get()
-    history.append([farenheit_value, celcius_value])
-
-    if farenheit_value == "":
-        is_farenheit_empty = True
-
-    if celcius_value == "":
-        is_celcius_empty = True
-
-    if is_farenheit_empty and not is_celcius_empty:
-        farenheit.set("{0:.2f}".format(float(celcius_value) * 1.8 + 32))
-
-    if not is_farenheit_empty and is_celcius_empty:
-        celcius.set("{0:.2f}".format((float(farenheit_value) - 32) * 5 / 9))
-
-    if not is_farenheit_empty and not is_celcius_empty:
-        if check_history(history):
-            print('updated celcius')
-            farenheit.set("{0:.2f}".format(float(celcius_value) * 1.8 + 32))
-        else:
-            print('updated farenheit')
-            celcius.set("{0:.2f}".format((float(farenheit_value) - 32) * 5 / 9))
-
-    return
-
-# returns false if farenheit was updated
-# return true if celcius or both were updated
-def check_history(array):
-    print(array)
-    length = len(array)
-
-    if length > 2:
-        if array[length-1][0].split(".")[0] != array[length-2][0].split(".")[0]:
-            return False
-
-    return True
+root = Tk()
+root.title("UI 1.1")
         
 # validation function
 def test_val(inStr, acttyp):
@@ -68,9 +29,6 @@ def clear_entires():
 last_updated_entry = 0
 last_farenheit_value = 0.0
 last_celcius_value = 0.0
-
-root = Tk()
-root.title("UI 1.1")
 
 # stringvars for values
 farenheit = StringVar()
@@ -102,14 +60,6 @@ celcius_entry = ttk.Entry(content, textvariable=celcius, takefocus=1)
 farenheit_entry.grid(row=0,column=1, padx=3, pady=3, sticky="ew")
 celcius_entry.grid(row=1,column=1, padx=3, pady=3, sticky="ew")
 
-# create button with enabled tab
-magic_button = ttk.Button(content, text="Преобразовать", command=calculate, takefocus=1)
-magic_button.grid(row=0,column=2, padx=0, pady=0, sticky="ew")
-
-# create clear button with enabled tab
-magic_button = ttk.Button(content, text="Очистить", command=clear_entires, takefocus=1)
-magic_button.grid(row=1,column=2, padx=0, pady=0, sticky="ew")
-
 # configure root and content for dynamic resizing
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
@@ -118,6 +68,22 @@ content.columnconfigure(1, weight=1)
 content.columnconfigure(2, weight=0)
 content.rowconfigure(0, weight=1)
 content.rowconfigure(1, weight=1)
+
+def calculate_farenheit(var, index, mode):
+    print("Traced variable {}".format(farenheit.get()))
+    print(index)
+    print(var)
+    print(mode)
+
+def calculate_celcius(var, index, mode):
+    print("Traced variable {}".format(celcius.get()))
+    print(index)
+    print(var)
+    print(mode)
+
+
+farenheit.trace("w", callback=calculate_farenheit)
+celcius.trace("w", callback=calculate_celcius)
 
 # set minsize for window
 root.update()
