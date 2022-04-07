@@ -1,14 +1,6 @@
 from tkinter import *
 from tkinter import ttk
 
-# conversion function
-def calculate():
-    current_value = farenheit.get()
-    if current_value == "":
-        celcius.set("0")
-        return
-    celcius.set("{0:.2f}".format((float(current_value) - 32) * 5 / 9))
-
 # validation function
 def test_val(inStr, acttyp):
     if acttyp == '1':
@@ -24,12 +16,8 @@ def is_float(value):
     except:
         return False
 
-def clear_entires():
-    celcius.set("")
-    farenheit.set("")
-
 root = Tk()
-root.title("UI 1.1")
+root.title("UI 1.2")
 
 # stringvars for values
 farenheit = StringVar()
@@ -55,13 +43,27 @@ farenheit_entry['validatecommand'] = (farenheit_entry.register(test_val),'%P','%
 farenheit_entry.focus_set()
 
 # create celcius entry with disabled tab
-celcius_entry = ttk.Entry(content, textvariable=celcius, takefocus=0)
+celcius_entry = ttk.Entry(content, textvariable=celcius, takefocus=0, state='disabled')
 # bind any key press to a function that returns "break" to make entry read-only
-celcius_entry.bind("<Key>", lambda e: "break")
+#celcius_entry.bind("<Key>", lambda e: "break")
 
 # place entries on the grid
 farenheit_entry.grid(row=0,column=1, padx=3, pady=3, sticky="ew")
 celcius_entry.grid(row=1,column=1, padx=3, pady=3, sticky="ew")
+
+# conversion function
+def calculate():
+    current_value = farenheit.get()
+    if current_value == "":
+        celcius.set("0")
+        return
+    celcius.set("{0:.2f}".format((float(current_value) - 32) * 5 / 9))
+    farenheit_entry.focus_set()
+
+def clear_entires():
+    celcius.set("")
+    farenheit.set("")
+    farenheit_entry.focus_set()
 
 # create button with enabled tab
 magic_button = ttk.Button(content, text="Преобразовать", command=calculate, takefocus=1)

@@ -81,9 +81,31 @@ def calculate_celcius(var, index, mode):
     print(var)
     print(mode)
 
+def calculate_f(var, index, mode):
+    print("changed f")
+    print(var, index, mode)
+    if var == "PY_VAR0": # f
+        far = farenheit.get()
+        celcius.set("{0:.2f}".format((float(far) - 32) * 5 / 9))
+    else:
+        return
 
-farenheit.trace("w", callback=calculate_farenheit)
-celcius.trace("w", callback=calculate_celcius)
+# set locale python https://metanit.com/python/tutorial/6.3.php
+# https://stackoverflow.com/questions/31910741/how-can-i-locale-format-a-python-decimal-and-preserve-its-precision
+# https://docs.python.org/3/library/locale.html
+
+def calculate_c(var, index, mode):
+    print("changed c")
+    print(var, index, mode)
+    if var == "PY_VAR1": 
+        cel = celcius.get()
+        farenheit.set("{0:.2f}".format(float(cel) * 9 / 5 - 32))
+    else:
+        return
+        
+
+farenheit.trace("w", callback=calculate_f)
+celcius.trace("w", callback=calculate_c)
 
 # set minsize for window
 root.update()
