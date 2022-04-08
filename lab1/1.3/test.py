@@ -14,3 +14,5 @@ print(locale.delocalize(num1))
 print(locale.delocalize(num2))
 print(locale.delocalize(num3))
 print(locale.delocalize(num4))
+
+print(float(""))
