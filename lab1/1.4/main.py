@@ -5,63 +5,85 @@ from tkinter import *
 from tkinter import ttk
 import locale
 import re
+import utils
 
-cur_locale = locale.getlocale()
+# const array for converison order
+ORDER = ['F', 'C', 'K']
 
-locale.setlocale(locale.LC_NUMERIC, cur_locale)
+# set user system's locale for decimal point character
+locale.setlocale(locale.LC_NUMERIC, '')
+print(f"User's locale: {locale.getlocale(locale.LC_NUMERIC)[0]}")
 
+# set different locale
+locale.setlocale(locale.LC_NUMERIC, 'es_ES')
+print(f"Set ESP locale: {locale.getlocale(locale.LC_NUMERIC)[0]}")
+
+# tkinter creation
 root = Tk()
-root.title("UI 1.3")
+root.title("UI 1.4")
         
 # stringvars for values
 value = StringVar()
-farenheit = StringVar()
-celcius = StringVar()
+table_vars = []
+for i in range(9):
+    table_vars.append(StringVar())
 error_msg = StringVar()
 
-def parse_to_float(val):
+# func - tries to parse value and sets farenheit, celcius
+def parse_and_set():
+    val = value.get()
+    # "block" typing multiple "-" characters
     if str.startswith(val, "-"):
         if len(val) > 1:
             value.set("-" + str.replace(val[1:], "-", ""))
-        return val
 
-    c = (locale.delocalize(val))
+    # delocalize input and try to parse it
+    c = (locale.delocalize(value.get()))
     try:
         float_c = float(c)
-        print(float_c)
+        print(f"Read number: {float_c}")
+        # in case input is float, there is no error
         error_msg.set("")
     except:
+        # empty line is non-convertable to string, but is not an error
         if error_msg.get().count == 0:
             print("empty")
             error_msg.set("")
-            return    
+            return
+        # same with "-" character
+        if value.get() == "-":
+            print("used -")
+            error_msg.set("")
+            return
+        # finally, input is not a number, set message
         error_msg.set("Введеные данные некорректны!")
-        print('exception')
+        print(f'Input is not a number! ({value.get()})')
         return
 
-    farenheit.set("{0:.2f}".format(float(c) * 9 / 5 - 32))
-    celcius.set("{0:.2f}".format((float(c) - 32) * 5 / 9)) 
-    #print(locale.format_string("%f", value))
-    #locale.delocalize()
-    
+    # update value after possible assignments
+    val = value.get()
 
-def check_input(val):
-    if len(val) == 0:
+    # set all entries in table
+    for i in range(9):
+        current_value = utils.converison(val, from_metric=ORDER[i // 3], to_metric=ORDER[i % 3])
+        table_vars[i].set("{0:.2f}".format(current_value))
+
+# func - checks input value
+def check_input():
+    # case with empty value
+    if len(value.get()) == 0:
         error_msg.set("")
-        farenheit.set("")
-        celcius.set("")
-        return
+        for var in table_vars:
+            var.set("")
+    # other cases
     else:
-        parsed = parse_to_float(val)
-                
+        parse_and_set()
 
+# callback func for value 
 def calculate(var, index, mode):
-    if not check_input(value.get()):
-        return
-    farenheit.set(value.get())
-    celcius.set(value.get())
-    pass
+    check_input()
 
+# on every value's update call calculate func
 value.trace("w", callback=calculate)
 
 # create a subwindow inside the main window with paddings
@@ -69,46 +91,58 @@ content = ttk.Frame(root, padding=(3,3,8,12))
 content.grid(column=0, row=0, sticky=(N, S, E, W))
 
 # create labels for text
-farenheit_label = ttk.Label(content, text="Из F в C:", anchor='center')
-celcius_label = ttk.Label(content, text="Из C в F:", anchor='center')
-error_label = ttk.Label(content, textvariable=error_msg)
-value_label=ttk.Label(content, text="Значение:", anchor='center')
-# 0-1 row <center>Label + Entry<center>
-
-# 2 row <left>Label + Label<left> <right>Label+Label<right>
-# 3 row <left>Label + Label<left> <right>Label+Label<right>
+farenheit_label_top = Label(content, text="F", anchor='center')
+celcius_label_top = Label(content, text="C", anchor='center')
+kelvin_label_top = Label(content, text="К", anchor='center')
+farenheit_label_left = Label(content, text="F", anchor='center')
+celcius_label_left = Label(content, text="C", anchor='center')
+kelvin_label_left = Label(content, text="К", anchor='center')
+error_label = Label(content, textvariable=error_msg, anchor='center')
+value_label = Label(content, text="Значение:", anchor='center')
 
 # place labels on the grid
 value_label.grid(row=0, column=0, sticky="news")
 error_label.grid(row=1, column=0, columnspan=2, sticky="news")
-farenheit_label.grid(row=2, column=0, sticky="news")
-celcius_label.grid(row=3, column=0, sticky="news")
+farenheit_label_left.grid(row=3, column=0, sticky="news")
+farenheit_label_top.grid(row=2, column=1, sticky="news")
+celcius_label_left.grid(row=4, column=0, sticky="news")
+celcius_label_top.grid(row=2, column=2, sticky="news")
+kelvin_label_left.grid(row=5, column=0, sticky="news")
+kelvin_label_top.grid(row=2, column=3, sticky="news")
 
+# building entries
 value_entry = ttk.Entry(content, textvariable=value, takefocus=1)
-farenheit_entry = ttk.Entry(content, textvariable=farenheit, takefocus=0)
-#farenheit_dependency = ttk.Entry(content, textvariable=farenheit_2row, takefocus=0)
-celcius_entry = ttk.Entry(content, textvariable=celcius, takefocus=0)
-#celcius_dependency = ttk.Entry(content, textvariable=celcius_2row, takefocus=0)
+table_entries = []
+for i in range(9):
+    #create entry and make it read-only
+    table_entries.append(ttk.Entry(content, textvariable=table_vars[i], takefocus=0))
+    table_entries[i].bind("<Key>", lambda e: "break")
 
 # place entries on the grid
-value_entry.grid(row=0,column=1, padx=3, pady=3, sticky="ew")
-farenheit_entry.grid(row=2,column=1, padx=3, pady=3, sticky="ew")
-#farenheit_dependency.grid(row=3,column=1, padx=3, pady=3, sticky="ew")
-celcius_entry.grid(row=3,column=1, padx=3, pady=3, sticky="ew")
-#celcius_dependency.grid(row=3,column=2, padx=3, pady=3, sticky="ew")
+value_entry.grid(row=0, column=1, columnspan=3, padx=3, pady=3, sticky="ew")
+ROW_PAD = 3
+COL_PAD = 1
+for i in range(9):
+    row_n = ROW_PAD + i // 3
+    col_n = i % 3 + COL_PAD
+    table_entries[i].grid(row=row_n, column=col_n, sticky="news")
 
 # configure root and content for dynamic resizing
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
-
 content.columnconfigure(0, weight=0)
 content.columnconfigure(1, weight=1)
+content.columnconfigure(2, weight=1)
+content.columnconfigure(3, weight=1)
 content.rowconfigure(0, weight=1)
-content.rowconfigure(1, weight=1)
+content.rowconfigure(1, weight=0)
 content.rowconfigure(2, weight=1)
 content.rowconfigure(3, weight=1)
+content.rowconfigure(4, weight=1)
+content.rowconfigure(5, weight=1)
 
-# set minsize for window
+# set minsize for window and update
 root.update()
-root.minsize(root.winfo_width()-75, root.winfo_height())
+root.geometry(f'{root.winfo_width()-200}x{root.winfo_height()}')
+root.minsize(root.winfo_width()-200, root.winfo_height())
 root.mainloop()
