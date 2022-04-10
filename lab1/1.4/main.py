@@ -1,6 +1,3 @@
-# row0 label+entry
-# row1 names (f, c, k)
-# row2-3 table
 from tkinter import *
 from tkinter import ttk
 import locale
