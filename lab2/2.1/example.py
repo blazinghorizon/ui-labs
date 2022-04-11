@@ -1,6 +1,24 @@
 from tkinter import *
 from tkinter.colorchooser import askcolor
 
+class ResizingCanvas(Canvas):
+    def __init__(self,parent,**kwargs):
+        Canvas.__init__(self,parent,**kwargs)
+        self.bind("<Configure>", self.on_resize)
+        self.height = self.winfo_reqheight()
+        self.width = self.winfo_reqwidth()
+
+    def on_resize(self,event):
+        # determine the ratio of old width/height to new width/height
+        wscale = float(event.width)/self.width
+        hscale = float(event.height)/self.height
+        self.width = event.width
+        self.height = event.height
+        # resize the canvas 
+        self.config(width=self.width, height=self.height)
+        # rescale all the objects tagged with the "all" tag
+        self.scale("all",0,0,wscale,hscale)
+
 class Paint(object):
 
     DEFAULT_PEN_SIZE = 5.0
@@ -24,7 +42,9 @@ class Paint(object):
         self.choose_size_button = Scale(self.root, from_=1, to=10, orient=HORIZONTAL)
         self.choose_size_button.grid(row=0, column=4)
 
-        self.c = Canvas(self.root, bg='white', width=600, height=600)
+        #self.c = Canvas(self.root, bg='white', width=600, height=600)
+        self.c = ResizingCanvas(self.root, width=600, height=600, bg="white")
+        self.c.addtag_all("all")
         self.c.grid(row=1, columnspan=5)
 
         self.setup()
@@ -37,7 +57,7 @@ class Paint(object):
         self.color = self.DEFAULT_COLOR
         self.eraser_on = False
         self.active_button = self.pen_button
-        self.c.bind('<B1-Motion>', self.paint)
+        self.c.bind('<B1-Motion>', self.paint_soft_line)
         self.c.bind('<ButtonRelease-1>', self.reset)
 
     def use_pen(self):
@@ -59,7 +79,7 @@ class Paint(object):
         self.active_button = some_button
         self.eraser_on = eraser_mode
 
-    def paint(self, event):
+    def paint_soft_line(self, event):
         self.line_width = self.choose_size_button.get()
         paint_color = 'white' if self.eraser_on else self.color
         if self.old_x and self.old_y:
@@ -68,6 +88,11 @@ class Paint(object):
                                capstyle=ROUND, smooth=TRUE, splinesteps=36)
         self.old_x = event.x
         self.old_y = event.y
+    
+    def paint_straight_line(self, event):
+        self.line_width = self.choose_size_button.get()
+        paint_color = 'white' if self.eraser_on else self.color
+
 
     def reset(self, event):
         self.old_x, self.old_y = None, None

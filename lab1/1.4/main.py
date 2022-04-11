@@ -57,12 +57,9 @@ def parse_and_set():
         print(f'Input is not a number! ({value.get()})')
         return
 
-    # update value after possible assignments
-    val = value.get()
-
     # set all entries in table
     for i in range(9):
-        current_value = utils.converison(val, from_metric=ORDER[i // 3], to_metric=ORDER[i % 3])
+        current_value = float(utils.converison(float_c, from_metric=ORDER[i // 3], to_metric=ORDER[i % 3]))
         table_vars[i].set("{0:.2f}".format(current_value))
 
 # func - checks input value
@@ -99,7 +96,7 @@ value_label = Label(content, text="Значение:", anchor='center')
 
 # place labels on the grid
 value_label.grid(row=0, column=0, sticky="news")
-error_label.grid(row=1, column=0, columnspan=2, sticky="news")
+error_label.grid(row=1, column=0, columnspan=4, sticky="news")
 farenheit_label_left.grid(row=3, column=0, sticky="news")
 farenheit_label_top.grid(row=2, column=1, sticky="news")
 celcius_label_left.grid(row=4, column=0, sticky="news")
@@ -109,10 +106,12 @@ kelvin_label_top.grid(row=2, column=3, sticky="news")
 
 # building entries
 value_entry = ttk.Entry(content, textvariable=value, takefocus=1)
+value_entry.focus_set()
 table_entries = []
 for i in range(9):
     #create entry and make it read-only
-    table_entries.append(ttk.Entry(content, textvariable=table_vars[i], takefocus=0))
+    paint_color = 'lightgray' if i in [0, 4, 8] else 'white'
+    table_entries.append(Entry(content, textvariable=table_vars[i], takefocus=0, bg=paint_color))
     table_entries[i].bind("<Key>", lambda e: "break")
 
 # place entries on the grid
