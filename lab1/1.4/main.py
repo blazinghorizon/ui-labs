@@ -110,7 +110,7 @@ value_entry.focus_set()
 table_entries = []
 for i in range(9):
     #create entry and make it read-only
-    paint_color = 'lightgray' if i in [0, 4, 8] else 'white'
+    paint_color = 'lightgray' if i % 4 == 0 else 'white'
     table_entries.append(Entry(content, textvariable=table_vars[i], takefocus=0, bg=paint_color))
     table_entries[i].bind("<Key>", lambda e: "break")
 
