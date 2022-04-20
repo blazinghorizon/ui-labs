@@ -60,7 +60,9 @@ def parse_and_set():
     # set all entries in table
     for i in range(9):
         current_value = float(utils.converison(float_c, from_metric=ORDER[i // 3], to_metric=ORDER[i % 3]))
-        table_vars[i].set("{0:.2f}".format(current_value))
+        string = locale.format_string("%.2f", current_value)
+        table_vars[i].set(string)
+        
 
 # func - checks input value
 def check_input():
